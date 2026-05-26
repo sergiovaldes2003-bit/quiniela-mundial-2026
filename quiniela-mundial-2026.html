@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiniela Mundial 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #00E676;
+      --green-dim: #00C853;
+      --red: #FF5252;
+      --yellow: #FFD740;
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #666;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: var(--green);
+    }
+    .logo span { color: var(--text); }
+    #admin-toggle {
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    #admin-toggle.active { border-color: var(--green); color: var(--green); }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 20px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .tab {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+      margin-bottom: -1px;
+    }
+    .tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+    /* MAIN */
+    main { max-width: 560px; margin: 0 auto; padding: 20px; }
+
+    /* INPUTS */
+    .field { margin-bottom: 12px; }
+    .field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    input, select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      outline: none;
+      transition: border .2s;
+    }
+    input:focus, select:focus { border-color: var(--green); }
+    select option { background: var(--surface2); }
+
+    /* ROW 2 col */
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* PARTIDO CARD */
+    .partido-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .partido-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .partido-nombre { font-size: 14px; font-weight: 600; }
+    .partido-estado {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: var(--surface2);
+      color: var(--muted);
+    }
+    .partido-estado.cerrado { background: rgba(0,230,118,.1); color: var(--green); }
+    .picks-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .pick-btn {
+      padding: 8px 4px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center;
+    }
+    .pick-btn:hover:not(:disabled) { border-color: var(--green); color: var(--text); }
+    .pick-btn.selected { border-color: var(--green); color: var(--green); background: rgba(0,230,118,.08); }
+    .pick-btn.correcto { border-color: var(--green); background: rgba(0,230,118,.15); color: var(--green); }
+    .pick-btn.incorrecto { border-color: var(--red); background: rgba(255,82,82,.1); color: var(--red); }
+    .pick-btn.resultado-ref { border-color: #444; color: #aaa; }
+    .pick-btn:disabled { cursor: default; }
+
+    /* BOTONES PRINCIPALES */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .btn:hover { border-color: var(--green); color: var(--green); }
+    .btn.primary { background: var(--green); color: #000; border-color: var(--green); }
+    .btn.primary:hover { background: var(--green-dim); }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+
+    /* STATUS */
+    .status { font-size: 12px; text-align: center; color: var(--muted); margin-top: 6px; min-height: 18px; }
+    .status.ok { color: var(--green); }
+    .status.err { color: var(--red); }
+
+    /* IA CARD */
+    .ia-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .ia-label { font-size: 11px; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .ia-text { font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+
+    /* TABLA */
+    .tabla-wrap { overflow: hidden; border: 1px solid var(--border); border-radius: 10px; }
+    .tabla-head {
+      display: grid;
+      grid-template-columns: 28px 1fr 52px 52px 52px 52px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .tabla-head span, .tabla-row span { text-align: center; }
+    .tabla-head span:nth-child(2), .tabla-row span:nth-child(2) { text-align: left; }
+    .tabla-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 52px 52px 52px 52px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      align-items: center;
+      font-size: 13px;
+      background: var(--surface);
+    }
+    .tabla-row:nth-child(2) { background: rgba(0,230,118,.04); }
+    .score-ok { color: var(--green); font-weight: 600; }
+    .score-na { color: var(--muted); }
+
+    /* EMPTY */
+    .empty { text-align: center; padding: 3rem 0; color: var(--muted); font-size: 14px; }
+    .empty .emoji { font-size: 36px; display: block; margin-bottom: 12px; }
+
+    /* LOADER */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { display: inline-block; animation: spin .8s linear infinite; }
+
+    /* FADE IN */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp .3s ease forwards; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--surface2); border: 1px solid var(--border);
+      padding: 10px 20px; border-radius: 8px; font-size: 13px;
+      opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+    #toast.ok { border-color: var(--green); color: var(--green); }
+    #toast.err { border-color: var(--red); color: var(--red); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">QUINIELA <span>MUNDIAL 2026</span></div>
+  <button id="admin-toggle">⚙ Admin</button>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="picks">Mis Picks</button>
+  <button class="tab" data-tab="tabla">Tabla</button>
+  <button class="tab admin-only" data-tab="resultados" style="display:none">Resultados</button>
+</div>
+
+<main>
+  <!-- TAB PICKS -->
+  <div id="tab-picks">
+    <div class="row2" style="margin-bottom:12px;">
+      <div class="field" style="margin:0">
+        <label>Tu nombre</label>
+        <input id="nombre" type="text" placeholder="Ej: Sergio" />
+      </div>
+      <div class="field" style="margin:0">
+        <label>Jornada</label>
+        <select id="jornada">
+          <option value="J1">Jornada 1</option>
+          <option value="J2">Jornada 2</option>
+          <option value="J3">Jornada 3</option>
+        </select>
+      </div>
+    </div>
+    <div id="partidos-container"></div>
+    <div class="btn-row">
+      <button class="btn primary" id="btn-guardar">💾 Guardar picks</button>
+      <button class="btn" id="btn-ia">✨ Analizar con IA</button>
+    </div>
+    <div class="status" id="status-picks"></div>
+    <div id="ia-output" style="display:none"></div>
+  </div>
+
+  <!-- TAB TABLA -->
+  <div id="tab-tabla" style="display:none">
+    <div id="tabla-container"></div>
+  </div>
+
+  <!-- TAB RESULTADOS -->
+  <div id="tab-resultados" style="display:none">
+    <div class="field">
+      <label>Jornada a cerrar</label>
+      <select id="res-jornada">
+        <option value="J1">Jornada 1</option>
+        <option value="J2">Jornada 2</option>
+        <option value="J3">Jornada 3</option>
+      </select>
+    </div>
+    <div id="res-container"></div>
+    <button class="btn primary" id="btn-publicar" style="margin-top:12px">✅ Publicar resultados</button>
+    <div class="status" id="status-res"></div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiYpeUh1sABOsf91DpCwZqpug7Ak5GY1E",
+    authDomain: "quiniela-mundial-2026-3a8ee.firebaseapp.com",
+    projectId: "quiniela-mundial-2026-3a8ee",
+    storageBucket: "quiniela-mundial-2026-3a8ee.firebasestorage.app",
+    messagingSenderId: "120559036718",
+    appId: "1:120559036718:web:aa172ee2021397ed80f2bf"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ─── DATOS ───────────────────────────────────────────
+  const PARTIDOS = {
+    J1: [
+      { id: 'j1p1', local: 'México', visitante: 'Polonia' },
+      { id: 'j1p2', local: 'Argentina', visitante: 'Arabia Saudita' },
+      { id: 'j1p3', local: 'Brasil', visitante: 'Serbia' },
+      { id: 'j1p4', local: 'España', visitante: 'Costa Rica' },
+    ],
+    J2: [
+      { id: 'j2p1', local: 'México', visitante: 'Argentina' },
+      { id: 'j2p2', local: 'Brasil', visitante: 'Suiza' },
+      { id: 'j2p3', local: 'Francia', visitante: 'Dinamarca' },
+      { id: 'j2p4', local: 'Portugal', visitante: 'Uruguay' },
+    ],
+    J3: [
+      { id: 'j3p1', local: 'México', visitante: 'Arabia Saudita' },
+      { id: 'j3p2', local: 'Argentina', visitante: 'Polonia' },
+      { id: 'j3p3', local: 'España', visitante: 'Japón' },
+      { id: 'j3p4', local: 'Alemania', visitante: 'Costa Rica' },
+    ],
+  };
+
+  // Estado local (cache)
+  let localPicks = {};      // { J1: { j1p1: '1', ... }, ... }
+  let resultados = {};      // { J1: { j1p1: '1', ... }, ... }
+  let todosLosPicks = {};   // { Sergio: { J1: {...}, J2: {...} }, ... }
+  let adminMode = false;
+
+  // ─── FIREBASE HELPERS ────────────────────────────────
+  async function guardarPicksFirebase(nombre, jornada, picks) {
+    await setDoc(doc(db, 'picks', nombre), { [jornada]: picks }, { merge: true });
+  }
+
+  async function guardarResultadosFirebase(jornada, res) {
+    await setDoc(doc(db, 'resultados', 'globales'), { [jornada]: res }, { merge: true });
+  }
+
+  async function cargarTodo() {
+    // Cargar resultados
+    const resDoc = await getDoc(doc(db, 'resultados', 'globales'));
+    if (resDoc.exists()) resultados = resDoc.data();
+
+    // Cargar todos los picks
+    const snap = await getDocs(collection(db, 'picks'));
+    snap.forEach(d => { todosLosPicks[d.id] = d.data(); });
+
+    // Picks del usuario actual
+    const nombre = document.getElementById('nombre').value.trim();
+    if (nombre && todosLosPicks[nombre]) localPicks = todosLosPicks[nombre];
+
+    renderPartidos();
+    renderTabla();
+    renderResultados();
+  }
+
+  // ─── RENDER PARTIDOS ──────────────────────────────────
+  function renderPartidos() {
+    const jornada = document.getElementById('jornada').value;
+    const partidos = PARTIDOS[jornada];
+    const picksJ = localPicks[jornada] || {};
+    const resJ = resultados[jornada] || {};
+    const container = document.getElementById('partidos-container');
+    container.innerHTML = '';
+
+    partidos.forEach(p => {
+      const seleccion = picksJ[p.id] || null;
+      const resultado = resJ[p.id] || null;
+      const cerrado = !!resultado;
+      const labels = { '1': p.local, 'X': 'Empate', '2': p.visitante };
+
+      const card = document.createElement('div');
+      card.className = 'partido-card fade-up';
+      card.innerHTML = `
+        <div class="partido-header">
+          <span class="partido-nombre">${p.local} vs ${p.visitante}</span>
+          <span class="partido-estado ${cerrado ? 'cerrado' : ''}">${cerrado ? `Resultado: ${resultado}` : 'Abierto'}</span>
+        </div>
+        <div class="picks-row">
+          ${['1','X','2'].map(op => {
+            let cls = 'pick-btn';
+            if (cerrado) {
+              if (op === resultado && op === seleccion) cls += ' correcto';
+              else if (op === seleccion && op !== resultado) cls += ' incorrecto';
+              else if (op === resultado) cls += ' resultado-ref';
+            } else if (op === seleccion) cls += ' selected';
+            return `<button class="${cls}" data-pid="${p.id}" data-op="${op}" ${cerrado ? 'disabled' : ''}>${labels[op]}</button>`;
+          }).join('')}
+        </div>`;
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('.pick-btn:not(:disabled)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nombre = document.getElementById('nombre').value.trim();
+        if (!nombre) { showToast('Escribe tu nombre primero', 'err'); return; }
+        const jornada = document.getElementById('jornada').value;
+        if (!localPicks[jornada]) localPicks[jornada] = {};
+        localPicks[jornada][btn.dataset.pid] = btn.dataset.op;
+        renderPartidos();
+      });
+    });
+  }
+
+  // ─── RENDER TABLA ─────────────────────────────────────
+  function renderTabla() {
+    const container = document.getElementById('tabla-container');
+    const participantes = Object.keys(todosLosPicks);
+
+    if (!participantes.length) {
+      container.innerHTML = '<div class="empty"><span class="emoji">🏆</span>Aún no hay participantes registrados.</div>';
+      return;
+    }
+
+    const jornadas = Object.keys(PARTIDOS);
+    let scores = participantes.map(nombre => {
+      let total = 0;
+      let porJornada = {};
+      jornadas.forEach(j => {
+        const resJ = resultados[j] || {};
+        const picksJ = todosLosPicks[nombre]?.[j] || {};
+        let ac = 0, ju = 0;
+        PARTIDOS[j].forEach(p => {
+          if (resJ[p.id]) { ju++; if (picksJ[p.id] === resJ[p.id]) { ac++; total++; } }
+        });
+        porJornada[j] = { ac, ju };
+      });
+      return { nombre, total, porJornada };
+    }).sort((a, b) => b.total - a.total);
+
+    const medals = ['🥇','🥈','🥉'];
+    let html = `
+      <div class="tabla-wrap">
+        <div class="tabla-head">
+          <span>#</span><span>Nombre</span>
+          ${jornadas.map(j => `<span>${j}</span>`).join('')}
+          <span>Total</span>
+        </div>`;
+
+    scores.forEach((s, i) => {
+      const jHTML = jornadas.map(j => {
+        const { ac, ju } = s.porJornada[j];
+        if (!ju) return `<span class="score-na">—</span>`;
+        return `<span class="${ac > 0 ? 'score-ok' : ''}">${ac}/${ju}</span>`;
+      }).join('');
+      html += `<div class="tabla-row">
+        <span>${i < 3 ? medals[i] : i+1}</span>
+        <span>${s.nombre}</span>
+        ${jHTML}
+        <span style="font-weight:600;text-align:center">${s.total}</span>
+      </div>`;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  // ─── RENDER RESULTADOS (ADMIN) ────────────────────────
+  function renderResultados() {
+    const jornada = document.getElementById('res-jornada').value;
+    const partidos = PARTIDOS[jornada];
+    const resJ = resultados[jornada] || {};
+    const container = document.getElementById('res-container');
+    container.innerHTML = '';
+
+    partidos.forEach(p => {
+      const sel = resJ[p.id] || null;
+      const labels = { '1': p.local, 'X': 'Empate', '2': p.visitante };
+      const card = document.createElement('div');
+      card.className = 'partido-card';
+      card.innerHTML = `
+        <div class="partido-header"><span class="partido-nombre">${p.local} vs ${p.visitante}</span></div>
+        <div class="picks-row">
+          ${['1','X','2'].map(op => `
+            <button class="pick-btn ${sel===op ? 'selected' : ''}" data-pid="${p.id}" data-op="${op}" data-j="${jornada}">${labels[op]}</button>
+          `).join('')}
+        </div>`;
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('.pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const j = btn.dataset.j;
+        if (!resultados[j]) resultados[j] = {};
+        resultados[j][btn.dataset.pid] = btn.dataset.op;
+        renderResultados();
+        renderPartidos();
+        renderTabla();
+      });
+    });
+  }
+
+  // ─── GUARDAR PICKS ────────────────────────────────────
+  document.getElementById('btn-guardar').addEventListener('click', async () => {
+    const nombre = document.getElementById('nombre').value.trim();
+    const jornada = document.getElementById('jornada').value;
+    if (!nombre) { showToast('Escribe tu nombre', 'err'); return; }
+    const picksJ = localPicks[jornada] || {};
+    if (!Object.keys(picksJ).length) { showToast('Selecciona al menos un pick', 'err'); return; }
+
+    const btn = document.getElementById('btn-guardar');
+    btn.disabled = true; btn.textContent = '⏳ Guardando...';
+    try {
+      await guardarPicksFirebase(nombre, jornada, picksJ);
+      todosLosPicks[nombre] = { ...(todosLosPicks[nombre] || {}), [jornada]: picksJ };
+      renderTabla();
+      showToast(`✓ Picks de ${nombre} guardados`, 'ok');
+    } catch(e) {
+      showToast('Error al guardar. Revisa las reglas de Firestore.', 'err');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '💾 Guardar picks';
+    }
+  });
+
+  // ─── ANALIZAR CON IA ──────────────────────────────────
+  document.getElementById('btn-ia').addEventListener('click', async () => {
+    const nombre = document.getElementById('nombre').value.trim();
+    const jornada = document.getElementById('jornada').value;
+    if (!nombre) { showToast('Escribe tu nombre', 'err'); return; }
+    const picksJ = localPicks[jornada] || {};
+    if (!Object.keys(picksJ).length) { showToast('Guarda tus picks primero', 'err'); return; }
+
+    const textoPartidos = PARTIDOS[jornada].map(p => {
+      const pick = picksJ[p.id];
+      if (!pick) return null;
+      const res = pick === '1' ? `${p.local} gana` : pick === 'X' ? 'Empate' : `${p.visitante} gana`;
+      return `${p.local} vs ${p.visitante}: ${res}`;
+    }).filter(Boolean).join('\n');
+
+    const iaDiv = document.getElementById('ia-output');
+    iaDiv.style.display = 'block';
+    iaDiv.innerHTML = `<div class="ia-card"><div class="ia-label">✨ Claude analizando...</div><div class="ia-text" style="color:var(--muted)"><span class="spin">◌</span> Un momento...</div></div>`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 400,
+          system: `Eres un analista experto en quinielas de fútbol. Analiza los picks del usuario: evalúa riesgo (1-10), pick más seguro, pick más arriesgado y una recomendación. Usa emojis. Máximo 120 palabras. En español.`,
+          messages: [{ role: 'user', content: `Mi quiniela ${jornada}:\n${textoPartidos}\n\nAnalízala.` }]
+        })
+      });
+      const data = await res.json();
+      const texto = data.content?.find(b => b.type === 'text')?.text || 'Sin respuesta.';
+      iaDiv.innerHTML = `<div class="ia-card"><div class="ia-label">✨ Análisis de Claude</div><div class="ia-text">${texto}</div></div>`;
+    } catch(e) {
+      iaDiv.innerHTML = `<div class="ia-card"><div class="ia-label" style="color:var(--red)">Error de conexión</div><div class="ia-text" style="color:var(--muted)">Necesitas una API key de Anthropic configurada.</div></div>`;
+    }
+  });
+
+  // ─── PUBLICAR RESULTADOS ─────────────────────────────
+  document.getElementById('btn-publicar').addEventListener('click', async () => {
+    const jornada = document.getElementById('res-jornada').value;
+    const resJ = resultados[jornada] || {};
+    if (!Object.keys(resJ).length) { showToast('Selecciona al menos un resultado', 'err'); return; }
+    const btn = document.getElementById('btn-publicar');
+    btn.disabled = true; btn.textContent = '⏳ Publicando...';
+    try {
+      await guardarResultadosFirebase(jornada, resJ);
+      renderPartidos(); renderTabla();
+      showToast(`✓ Resultados de ${jornada} publicados`, 'ok');
+    } catch(e) {
+      showToast('Error al publicar', 'err');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '✅ Publicar resultados';
+    }
+  });
+
+  // ─── TABS ─────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('main > div').forEach(d => d.style.display = 'none');
+      document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
+      if (btn.dataset.tab === 'tabla') renderTabla();
+      if (btn.dataset.tab === 'resultados') renderResultados();
+    });
+  });
+
+  // ─── ADMIN ───────────────────────────────────────────
+  document.getElementById('admin-toggle').addEventListener('click', () => {
+    adminMode = !adminMode;
+    document.getElementById('admin-toggle').classList.toggle('active', adminMode);
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = adminMode ? 'inline-block' : 'none');
+    showToast(adminMode ? 'Modo admin activado' : 'Modo admin desactivado', adminMode ? 'ok' : '');
+  });
+
+  // ─── CAMBIOS DE JORNADA ───────────────────────────────
+  document.getElementById('jornada').addEventListener('change', renderPartidos);
+  document.getElementById('res-jornada').addEventListener('change', renderResultados);
+  document.getElementById('nombre').addEventListener('change', () => {
+    const nombre = document.getElementById('nombre').value.trim();
+    if (nombre && todosLosPicks[nombre]) {
+      localPicks = todosLosPicks[nombre];
+      renderPartidos();
+    }
+  });
+
+  // ─── TOAST ───────────────────────────────────────────
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 2500);
+  }
+
+  // ─── ARRANCAR ────────────────────────────────────────
+  cargarTodo();
+</script>
+</body>
+</html>
